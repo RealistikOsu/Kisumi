@@ -5,7 +5,6 @@ from typing import (
     TypeVar,
     Callable,
     Type,
-    GenericAlias,
 )
 from functools import cache
 from .constants import HEADER_LEN
@@ -13,6 +12,9 @@ from .types import *
 import struct
 
 T = TypeVar("T", *SERIALISABLE_TYPES)
+__all__ = (
+    "BinaryWriter",
+)
 
 class BinaryWriter:
     """A binary serialiser managing the contents of a bytearray. It by itself
@@ -20,8 +22,10 @@ class BinaryWriter:
 
     __slots__ = ("_buffer",)
 
-    def __init__(self) -> None:
-        self._buffer = bytearray(b"\x00" * HEADER_LEN)
+    def __init__(self, pralloc_header: bool = True) -> None:
+        # Pre-allocate the header.
+        self._buffer = bytearray(b"\x00" * HEADER_LEN) \
+            if pralloc_header else bytearray()
     
     # Using the struct module to write primitive types into the buffer.
     # https://docs.python.org/3/library/struct.html#format-characters
@@ -35,7 +39,7 @@ class BinaryWriter:
     def write_u8(self, num: u8) -> "BinaryWriter":
         """Writes an 8-bit unsigned integer into the buffer."""
 
-        self._buffer += struct.pack("<B", num)
+        self._buffer.append(num)
         return self
     
     def write_i16(self, num: i16) -> "BinaryWriter":
@@ -135,6 +139,15 @@ class BinaryWriter:
 
         self._buffer += contents
         return self
+    
+    def finish(self, packet_id: u16) -> bytearray:
+        """Completes packet serialisation by writing the packet header to the front."""
+
+        # FIXME: Bruh.
+        self._buffer[0:1] = struct.pack("<H", packet_id)
+        self._buffer[3:6] = struct.pack("<I", len(self._buffer) - HEADER_LEN)
+        return self._buffer
+
 
 _READERS = {
     u8: BinaryWriter.write_u8,
