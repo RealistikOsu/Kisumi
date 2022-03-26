@@ -69,13 +69,13 @@ class BinaryWriter:
     def write_i64(self, num: i64) -> "BinaryWriter":
         """Writes a signed 64-bit integer to the buffer."""
 
-        self._buffer += struct.pack("<l", num)
+        self._buffer += struct.pack("<q", num)
         return self
 
     def write_u64(self, num: u64) -> "BinaryWriter":
         """Writes an 8-bit unsigned integer into the buffer."""
 
-        self._buffer += struct.pack("<L", num)
+        self._buffer += struct.pack("<Q", num)
         return self
     
     def write_f32(self, num: float) -> "BinaryWriter":
