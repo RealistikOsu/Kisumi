@@ -55,7 +55,7 @@ class Actions(IntEnum):
         """Converts the current action enum into one compatible with osu!stable's
         action system."""
 
-        if self.is_game_client():
+        if self.is_game_client:
             return self
         
         return _ACTION_MAP[self]
