@@ -11,11 +11,24 @@ class ByteBuffer:
         "_lock",
     )
 
-    def __init__(self) -> None:
-        """Creates an empty instance of a `ByteBuffer`."""
+    def __init__(self, buf: bytearray) -> None:
+        """Creates an instance of a `ByteBuffer` from an existing bytearray."""
 
         self._lock = asyncio.Lock()
         self._buf = bytearray()
+    
+    @staticmethod
+    def new(self) -> "ByteBuffer":
+        """Creates an empty instance of ByteBuffer."""
+
+        return ByteBuffer(bytearray())
+
+    @property
+    def empty(self) -> bool:
+        """Checks if the buffer is empty."""
+
+        # should this be locked?
+        return len(self._buf) == 0
     
     async def append(self, e: ACCEPTED_TYPES) -> None:
         """Appends `e` to the end of the buffer, acquiring the lock in the
