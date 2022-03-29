@@ -3,7 +3,7 @@ from pathlib import Path
 from starlette.config import Config
 from starlette.datastructures import Secret
 
-config = Config("kisumi.env")
+config = Config(".env")
 
 DEBUG = "debug" in map(str.lower, sys.argv)
 
