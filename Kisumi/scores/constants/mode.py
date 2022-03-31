@@ -27,3 +27,16 @@ class Mode(IntEnum):
     TAIKO = 1
     CATCH = 2
     MANIA = 3
+
+    @cached_property
+    def name(self) -> str:
+        """Returns the common name of the mode as a string."""
+
+        return _MODE_NAMES[self.value]
+
+_MODE_NAMES = (
+    "standard",
+    "taiko",
+    "catch",
+    "mania",
+)

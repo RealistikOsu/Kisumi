@@ -3,10 +3,11 @@ from typing import (
     Any,
     Union,
     Optional,
+    Iterable,
 )
 import aiomysql
 
-FORMAT_ARGS = Union[list, tuple]
+FORMAT_ARGS = Iterable[Union[int, str]]
 
 class MySQLConnection:
     """A thin wrapper around an asynchronous MySQL connection, offering a
@@ -55,6 +56,15 @@ class MySQLConnection:
         row = await self.fetchone(query, args)
 
         return row[0] if row else None
+    
+    async def fetchiter(self, query: str, args: FORMAT_ARGS = ()) -> _MySQLCursorIter:
+        """Executes a MySQL query formatted with `args`, returning an iterator
+        allowing you to fetch rows on demand."""
+
+        cur = self._conn.cursor()
+        await cur.execute(query, args)
+
+        return _MySQLCursorIter(cur)
 
 class _MySQLCursorIter:
     """An iterable result allowing for using large result sets memory
@@ -108,6 +118,8 @@ class MySQLPool:
     
     async def acquire(self) -> _MySQLAcquireContextManager:
         """Acquires a MySQL connection using a context manager."""
+
+        return _MySQLAcquireContextManager(self)
 
 # Heavily inspired by aiomysql's context managers.
 class _MySQLAcquireContextManager:
