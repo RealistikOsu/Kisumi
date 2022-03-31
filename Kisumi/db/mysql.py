@@ -110,7 +110,7 @@ class MySQLPool:
         username: str,
         password: str,
         database: str,
-        port: int = 3306
+        port: int = 3306,
     ) -> None:
         """Creates and connects to new MySQL pool."""
 

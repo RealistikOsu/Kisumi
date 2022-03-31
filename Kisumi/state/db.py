@@ -23,6 +23,7 @@ async def initialise_database_connections() -> int:
         redis = await aioredis.create_redis_pool(str(config.REDIS_DSN))
 
         # Redis connection test.
+        # TODO: Move to function.
         await redis.delete("conn_test") # Just in case.
         await redis.set("conn_test", 2)
         val = await redis.get("conn_test")
