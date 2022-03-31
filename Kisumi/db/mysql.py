@@ -124,5 +124,5 @@ class _MySQLAcquireContextManager:
     async def __aenter__(self) -> MySQLConnection:
         return await self._pool.acquire_connection()
     
-    async def __aexit(self, *_) -> None:
+    async def __aexit__(self, *_) -> None:
         return await self._pool.release_connection()
