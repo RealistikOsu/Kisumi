@@ -102,6 +102,26 @@ class MySQLPool:
         """Creates an instance of `MySQLPool` from an existing pool."""
 
         self._pool = conn
+
+    @classmethod
+    async def connect(
+        self,
+        host: str,
+        username: str,
+        password: str,
+        database: str,
+        port: int = 3306
+    ) -> None:
+        """Creates and connects to new MySQL pool."""
+
+        self._pool = await aiomysql.create_pool(
+            host=host,
+            user=username,
+            password=password,
+            db=database,
+            port=port,
+            pool_recycle=False
+        )
     
     async def acquire_connection(self) -> MySQLConnection:
         """Acquires the MySQL connection from the pool, waiting until there
@@ -120,6 +140,15 @@ class MySQLPool:
         """Acquires a MySQL connection using a context manager."""
 
         return _MySQLAcquireContextManager(self)
+    
+    async def test_connection(self) -> None:
+        """Sends an simple query and then checks if results are fine."""
+
+        async with self.acquire() as conn:
+            result = await conn.fetchcol("SELECT 1+1")
+
+        assert result == 2, "MySQL connection test failed!"
+
 
 # Heavily inspired by aiomysql's context managers.
 class _MySQLAcquireContextManager:

@@ -13,6 +13,12 @@ class CustomMode(IntEnum):
         """Converts the custom mode into its 2 letter prefix."""
 
         return _C_MODE_CODE[self.value]
+    
+    @cached_property
+    def name(self) -> str:
+        """Returns CustomMode name as a string."""
+
+        return _C_MODE_CODE[self.value].lower()
 
 _C_MODE_CODE = (
     "VN",
