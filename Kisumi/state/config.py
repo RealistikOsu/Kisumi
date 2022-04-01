@@ -16,3 +16,7 @@ MYSQL_PORT = config("MYSQL_PORT", cast=int, default=3306)
 REDIS_DSN = config("REDIS_DSN", cast=Secret)
 
 DATA_DIR = config("DATA_DIR", cast=Path)
+
+SERVER_NAME = config("SERVER_NAME", cast=str, default="RealistikOsu")
+SERVER_DOMAIN = config("SERVER_DOMAIN", cast=str, default="ussr.pl")
+SERVER_PORT = config("SERVER_PORT", cast=int, default=5344)

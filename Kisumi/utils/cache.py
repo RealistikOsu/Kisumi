@@ -36,7 +36,7 @@ class LRUCache(Generic[T]):
     def __clear_till_capacity_met(self) -> None:
         """Removes items from the front of the cache until the capacity is left."""
 
-        c_iter = self._cache.keys()
+        c_iter = self._cache.__iter__()
         while len(self) > self._capacity:
             # Iterator hack to allow us to remove the first index efficiently.
             self.__drop(next(c_iter))
