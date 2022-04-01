@@ -6,7 +6,11 @@ from .components.auth import (
 )
 from .components.queue import ByteBuffer
 from .constants.client import ClientType
+from typing import TYPE_CHECKING
 from dataclasses import dataclass
+
+if TYPE_CHECKING:
+    from user.user import User
 
 class AbstractClient(ABC):
     """An abstract client class."""
@@ -18,6 +22,10 @@ class AbstractClient(ABC):
 
     @abstractmethod
     async def logout(self) -> None:
+        ...
+    
+    @abstractmethod
+    async def on_attach(self, user: "User") -> None:
         ...
 
 @dataclass
