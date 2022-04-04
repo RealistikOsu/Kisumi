@@ -1,4 +1,5 @@
 from starlette.applications import Starlette
+from starlette.routing import Host
 from logger import error, DEBUG, info
 from state import config
 import asyncio
@@ -9,6 +10,9 @@ import sys
 from state.db import (
     initialise_database_connections,
 )
+
+# Router imports.
+from handlers.bancho.router import router as bancho_router
 
 # Use uvloop if possible.
 try:
@@ -34,6 +38,8 @@ async def on_shutdown() -> None:
 
     ...
 
+
+BANCHO_SUBDOMAINS = ("c", "c4", "c5", "c6", "ce")
 def main(argv: list[str]) -> int:
     """Kisumi main entry point."""
 
@@ -45,6 +51,14 @@ def main(argv: list[str]) -> int:
             ),
             on_shutdown= (
                 on_shutdown,
+            ),
+            routes= (
+                # The bancho protocol operates on many donains, alongside supporting
+                # switchers.
+                *(Host(f"{subdomain}.ppy.sh", bancho_router, "Bancho Switcher")
+                for subdomain in BANCHO_SUBDOMAINS),
+                *(Host(f"{subdomain}.{config.SERVER_DOMAIN}", bancho_router, "Bancho Devserver")
+                for subdomain in BANCHO_SUBDOMAINS),
             ),
         ),
         port= config.SERVER_PORT,

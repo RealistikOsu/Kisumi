@@ -15,9 +15,10 @@ class User:
 
     id: int
     stats: Stats
-    clients: list[AbstractClient]
+    clients: list[AbstractClient] # Ordered by priority
     ...
 
+    # Properies.
     @property
     def stable_client(self) -> Optional[StableClient]:
         """Returns the primary stable client attached to the user if present,
@@ -34,6 +35,13 @@ class User:
         
         return
     
+    @property
+    def online(self) -> bool:
+        """Checks if the user has any clients attached to it."""
+
+        return bool(self.clients)
+    
+    # Public functions
     async def insert_client(self, client: AbstractClient) -> None:
         """Attaches a client to a user, managing client prioritisation."""
 
