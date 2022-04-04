@@ -18,7 +18,7 @@ async def main_post(req: Request) -> Response:
     """The main handler for post requests to the bancho server."""
 
     # Only allow osu! clients past this point.
-    if req.headers.get("User-Agent") == "osu!":
+    if req.headers.get("User-Agent") != "osu!":
         return await main_get(req)
 
     # Select whether this is a login request or a packet request.
