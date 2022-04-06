@@ -42,7 +42,7 @@ class PacketHandler:
                 # List len
                 arr_len = reader.read_u16()
                 args.append(
-                    [reader.read_i32() for _ in range(arr_len)]
+                    [reader.read_i32() for _ in range(arr_len)] # TODO: Replace with type.
                 )
             else:
                 assert arg_type in SERIALISABLE_TYPES, \
