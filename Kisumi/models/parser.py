@@ -1,4 +1,5 @@
 # FastAPI-style parsing of req args into classes.
+# TODO: Rewite https://i.imgur.com/VrsELCI.png
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 from email.policy import default
@@ -64,8 +65,13 @@ class GetArg(Header):
 class Body(AbstractRequestParser):
     """Returns the request body."""
 
+    def __init__(self, into_str: bool = False) -> None:
+        super().__init__()
+        self._into_str = into_str
+
     async def parse(self, req: Request) -> Optional[bytearray]:
-        return bytearray(req.body())
+        return bytearray(req.body()) if not self._into_str \
+            else (await req.body()).decode()
 
 _ALL_PARSERS = (
     Header,
@@ -105,9 +111,3 @@ class RequestStruct:
         inst = cls()
         if await inst.parse(req):
             return inst
-
-# Test
-class BruhModel(RequestStruct):
-    bruh: Header("Bruh", cast= int)
-    now: PostArg("dsad", default= "Aa")
-    oof: Optional[GetArg("fkuhgdfr", cast= float)]
