@@ -8,6 +8,8 @@ from user.client.components.auth import TokenString
 from models.misc_models import LoginRequestStruct
 from state import config
 
+from .login import login_handle
+
 # The page people get if they access this from their web browser.
 @router.route("/", methods= ["GET"])
 async def main_get(_: Request) -> PlainTextResponse:
@@ -34,4 +36,13 @@ async def main_post(req: Request) -> Response:
     # Login attempt
     else:
         login_data = await LoginRequestStruct.from_request(req)
-        ...
+        if not login_data:
+            return ... # Relog request.
+        data, token = await login_handle(login_data)
+        
+        return Response(
+            content= data,
+            headers= {
+                "cho_token": token.into_auth_str() if token else "no",
+            },
+        )

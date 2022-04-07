@@ -14,6 +14,9 @@ from state.db import (
 # Router imports.
 from handlers.bancho.router import router as bancho_router
 
+# FIXME: Find another way to initalise these files.
+from handlers.bancho.main_handler import main_post as _
+
 # Use uvloop if possible.
 try:
     __import__("uvloop").install()
@@ -21,7 +24,7 @@ except ImportError:
     error("Uvloop could not be installed! Expect degraded performance.")
 
 _STARTUP_TASKS = (
-    initialise_database_connections(),
+    #initialise_database_connections(),
 )
 
 async def on_startup() -> None:
