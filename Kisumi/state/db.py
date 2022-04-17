@@ -2,23 +2,22 @@ import aioredis
 import traceback
 from logger import error
 from state import config
-from db.mysql import MySQLPool
+from motor import motor_asyncio
 
-sql: MySQLPool
+mongo_client: motor_asyncio.AsyncIOMotorClient
+mongo: motor_asyncio.AsyncIOMotorDatabase
 redis: aioredis.Redis
 
 async def initialise_database_connections() -> None:
-    global sql, redis
+    global mongo_client, mongo, redis
 
     # Exception handling is done by starlette.
-    sql = await MySQLPool.connect(
-        host=config.MYSQL_HOST,
-        username=str(config.MYSQL_USER),
-        password=str(config.MYSQL_PASSWORD),
-        database=config.MYSQL_DATABASE,
-        port=config.MYSQL_PORT
+    mongo_client = motor_asyncio.AsyncIOMotorClient(
+        config.MONGO_HOST,
+        config.MONGO_PORT,
     )
-    await sql.test_connection()
+
+    mongo = mongo_client[config.MONGO_DB]
 
     redis = await aioredis.create_redis_pool(str(config.REDIS_DSN))
 
