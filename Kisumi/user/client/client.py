@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from .components.chat import AbstractChatComponent
 from .components.auth import (
     AbstractAuthComponent,
-    UserAuthComponent,
+    StableAuthComponent,
 )
 from .components.queue import ByteBuffer
 from .constants.client import ClientType
@@ -32,5 +32,5 @@ class AbstractClient(ABC):
 class StableClient(AbstractClient):
     """A class representing the stable game client (2013-2022)"""
 
-    auth: UserAuthComponent
+    auth: StableAuthComponent
     queue: ByteBuffer

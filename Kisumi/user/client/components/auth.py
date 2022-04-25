@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional, TYPE_CHECKING
 from functools import cache
-from utils import hash
+from utils.hash import BCryptPassword
 import uuid
 import asyncio
 
@@ -24,7 +24,7 @@ def _is_valid_md5(md5: str) -> bool:
     """Checks if the given `md5` meets the md5 specification."""
 
     # Simple, not in-depth check made to be quick.
-    return len(md5) == 32
+    return isinstance(md5, str) and len(md5) == 32
 
 class AbstractAuthComponent(ABC):
     """An abstract class representing the client authentication component."""
@@ -37,7 +37,7 @@ class AbstractAuthComponent(ABC):
     async def authenticate(self, token: str) -> bool:
         ...
 
-class UserAuthComponent(AbstractAuthComponent):
+class StableAuthComponent(AbstractAuthComponent):
     """A component utilised for processing a user's authentication."""
 
     __slots__ = (
@@ -48,7 +48,7 @@ class UserAuthComponent(AbstractAuthComponent):
         "_user",
     )
 
-    def __init__(self, pw: str, token: Optional[str], user: "User") -> None:
+    def __init__(self, pw: BCryptPassword, token: Optional["TokenString"], user: "User") -> None:
         super().__init__()
 
         self._lock = asyncio.Lock()
@@ -68,10 +68,10 @@ class UserAuthComponent(AbstractAuthComponent):
         """Generates a random one-time use token that may be utilised within
         authentication."""
 
-        self._token = _get_unique_token()
+        self._token = TokenString(self._user.id, _get_unique_token())
         return self._token
     
-    def __compare_token(self, token: str) -> bool:
+    def __compare_token(self, token: "TokenString") -> bool:
         """Compares a token to the stored token."""
 
         if self._token:
@@ -105,7 +105,7 @@ class UserAuthComponent(AbstractAuthComponent):
             return md5 == self._cached_md5
         
         # Compare pw.
-        if await hash.compare_pw_async(md5, self._pw_bcrypt):
+        if await self._pw_bcrypt.compare_async(md5):
             self.__set_cached_pw(md5)
             return True
         
@@ -119,7 +119,7 @@ class UserAuthComponent(AbstractAuthComponent):
             # It is a password MD5.
             if _is_valid_md5(token):
                 return await self.__compare_bcrypt(token)
-            elif _is_valid_uuid4(token):
+            elif isinstance(token, TokenString):
                 return self.__compare_token(token)
 
         return False

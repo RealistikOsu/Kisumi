@@ -1,11 +1,14 @@
 from dataclasses import dataclass
+from email.generator import Generator
 from .stats import Stats
 from .client.constants.client import ClientType
 from .client.client import (
     AbstractClient,
     StableClient,
 )
+from .client.components.auth import TokenString
 from typing import (
+    Any,
     Optional,
 )
 
@@ -16,6 +19,8 @@ class User:
     id: int
     stats: Stats
     clients: list[AbstractClient] # Ordered by priority
+    scores: Any # Iterable object holding a list of top 100 scores and able to fetch more.
+
     ...
 
     # Properies.
@@ -36,6 +41,17 @@ class User:
         return
     
     @property
+    def stable_clients(self) -> list[StableClient]:
+        """Returns a list of all attached clients with the type `ClientType.STABLE`."""
+
+        return [cl for cl in self.clients if cl.type is ClientType.STABLE]
+    
+    @property
+    def stable_clients_generator(self) -> Generator[StableClient, None, None]:
+        """Same as `User.stable_clients` except returns a generator."""
+        return (cl for cl in self.clients if cl.type is ClientType.STABLE)
+    
+    @property
     def online(self) -> bool:
         """Checks if the user has any clients attached to it."""
 
@@ -53,3 +69,11 @@ class User:
             self.clients.append(client)
         
         await client.on_attach(self)
+    
+    async def stable_client_from_tokenstring(self, token: TokenString) -> Optional[StableClient]:
+        """Iterates over all attached stable clients and returns one with a 
+        matching `TokenString`."""
+
+        for client in self.stable_clients_generator:
+            if await client.auth.authenticate(token):
+                return client
