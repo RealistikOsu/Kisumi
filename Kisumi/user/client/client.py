@@ -6,7 +6,10 @@ from .components.auth import (
 )
 from .components.queue import ByteBuffer
 from .constants.client import ClientType
-from typing import TYPE_CHECKING
+from .components.hwid import StableHWID
+from typing import (
+    TYPE_CHECKING,
+)
 from dataclasses import dataclass
 
 if TYPE_CHECKING:
@@ -34,3 +37,4 @@ class StableClient(AbstractClient):
 
     auth: StableAuthComponent
     queue: ByteBuffer
+    hwid: StableHWID
