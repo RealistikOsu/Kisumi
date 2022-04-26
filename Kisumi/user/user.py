@@ -1,5 +1,7 @@
+# XXX: Perhaps look into moving this into __innit__.py
 from dataclasses import dataclass
 from email.generator import Generator
+from utils.hash import BCryptPassword
 from .stats import Stats
 from .client.constants.client import ClientType
 from .client.client import (
@@ -20,6 +22,7 @@ class User:
     stats: Stats
     clients: list[AbstractClient] # Ordered by priority
     scores: Any # Iterable object holding a list of top 100 scores and able to fetch more.
+    password: BCryptPassword
 
     ...
 

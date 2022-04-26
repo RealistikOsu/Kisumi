@@ -1,4 +1,5 @@
 from enum import IntEnum
+from enums import IntEnum
 from functools import cached_property
 
 class CustomMode(IntEnum):

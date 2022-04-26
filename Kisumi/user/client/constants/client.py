@@ -1,4 +1,4 @@
-from enum import IntEnum
+from enums import IntEnum
 
 class ClientType(IntEnum):
     """An enumeration for the available types of clients."""
