@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from inspect import get_annotations
 from typing import (
     Awaitable,
     Optional,
@@ -6,6 +7,7 @@ from typing import (
     Callable,
     Type,
     GenericAlias,
+    get_type_hints,
 )
 from .types import *
 from .reader import BinaryReader
@@ -28,7 +30,7 @@ class PacketHandler:
 
         args = []
 
-        arg_iter = iter(self.handler.__annotations__.values())
+        arg_iter = iter(get_annotations(self.handler))
         # Skip first item as it will always be the user.
         next(arg_iter)
 

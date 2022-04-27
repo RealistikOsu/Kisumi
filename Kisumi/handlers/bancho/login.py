@@ -1,9 +1,13 @@
 from user.client.components.auth import TokenString
-from models.misc_models import LoginRequestStruct
+from fastapi.requests import Request
+from pydantic import BaseModel
 from typing import Optional
 
+class LoginRequestModel(BaseModel):
+    """A validated model for login data."""
+
 async def login_handle(
-    data: LoginRequestStruct,
+    request: Request,
 ) -> tuple[bytearray, Optional[TokenString]]:
     """Handles the authentication process."""
 

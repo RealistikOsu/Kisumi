@@ -1,18 +1,17 @@
 from .router import router
-from starlette.requests import Request
-from starlette.responses import (
+from fastapi.requests import Request
+from fastapi.responses import (
     PlainTextResponse,
     Response,
 )
 from user.client.components.auth import TokenString
-from models.misc_models import LoginRequestStruct
 from state import config
 
 from .login import login_handle
 
 # The page people get if they access this from their web browser.
 @router.route("/", methods= ["GET"])
-async def main_get(_: Request) -> PlainTextResponse:
+async def main_get() -> PlainTextResponse:
     return PlainTextResponse(
         f"{config.SERVER_NAME} - Powered by Kisumi!"
     )
@@ -23,7 +22,7 @@ async def main_post(req: Request) -> Response:
 
     # Only allow osu! clients past this point.
     if req.headers.get("User-Agent") != "osu!":
-        return await main_get(req)
+        return await main_get()
 
     # Select whether this is a login request or a packet request.
     auth_token = TokenString.from_auth_str(
@@ -35,10 +34,7 @@ async def main_post(req: Request) -> Response:
         ...
     # Login attempt
     else:
-        login_data = await LoginRequestStruct.from_request(req)
-        if not login_data:
-            return ... # Relog request.
-        data, token = await login_handle(login_data)
+        data, token = await login_handle(req)
         
         return Response(
             content= data,

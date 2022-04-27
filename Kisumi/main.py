@@ -1,5 +1,5 @@
-from starlette.applications import Starlette
 from starlette.routing import Host
+from fastapi.applications import FastAPI
 from logger import error, DEBUG, info
 from state import config
 import asyncio
@@ -47,7 +47,10 @@ def main(argv: list[str]) -> int:
     """Kisumi main entry point."""
 
     uvicorn.run(
-        Starlette(
+        FastAPI(
+            title= "Kisumi",
+            openapi_url= None,
+            docs_url= None,
             debug= DEBUG,
             on_startup= (
                 on_startup,

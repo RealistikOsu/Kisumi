@@ -1,3 +1,3 @@
-from starlette.routing import Router
+from fastapi.routing import APIRouter
 
-router = Router()
+router = APIRouter()

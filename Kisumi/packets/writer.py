@@ -7,7 +7,7 @@ from typing import (
     Type,
 )
 from functools import cache
-from .constants import HEADER_LEN
+from .constants import HEADER_LEN, PacketIDs
 from .types import *
 import struct
 
@@ -15,6 +15,8 @@ T = TypeVar("T", *SERIALISABLE_TYPES)
 __all__ = (
     "BinaryWriter",
 )
+
+NULL_HEADER = bytearray(b"\x00" * HEADER_LEN)
 
 class BinaryWriter:
     """A binary serialiser managing the contents of a bytearray. It by itself
@@ -24,7 +26,7 @@ class BinaryWriter:
 
     def __init__(self, pralloc_header: bool = True) -> None:
         # Pre-allocate the header.
-        self._buffer = bytearray(b"\x00" * HEADER_LEN) \
+        self._buffer = NULL_HEADER.copy() \
             if pralloc_header else bytearray()
     
     # Using the struct module to write primitive types into the buffer.
@@ -140,11 +142,12 @@ class BinaryWriter:
         self._buffer += contents
         return self
     
-    def finish(self, packet_id: u16) -> bytearray:
+    def finish(self, packet_id: PacketIDs) -> bytearray:
         """Completes packet serialisation by writing the packet header to the front."""
 
         # FIXME: Bruh.
-        self._buffer[0:1] = struct.pack("<H", packet_id)
+        assert self._buffer[0:6] == NULL_HEADER, "Attempted to write into a non-empty header!"
+        self._buffer[0:1] = struct.pack("<H", packet_id.value)
         self._buffer[3:6] = struct.pack("<I", len(self._buffer) - HEADER_LEN)
         return self._buffer
 
