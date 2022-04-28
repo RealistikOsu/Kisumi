@@ -1,6 +1,5 @@
 # XXX: Perhaps look into moving this into __innit__.py
 from dataclasses import dataclass
-from email.generator import Generator
 from utils.hash import BCryptPassword
 from .stats import Stats
 from .client.constants.client import ClientType
@@ -12,6 +11,7 @@ from .client.components.auth import TokenString
 from typing import (
     Any,
     Optional,
+    Generator,
 )
 
 @dataclass
@@ -25,6 +25,17 @@ class User:
     password: BCryptPassword
 
     ...
+
+    # Special Methods
+    def __eq__(self, o: "User") -> bool:
+        """Compares two instances of `User`."""
+
+        return self.id == o.id
+    
+    def __hash__(self) -> int:
+        """Makes the object hashable, letting it be able to be used in dictionaries
+        as a key."""
+        return self.id
 
     # Properies.
     @property
@@ -40,8 +51,6 @@ class User:
         # list, the stable client shall always be prioritised.
         if (first_client := self.clients[0]).type is ClientType.STABLE:
             return first_client
-        
-        return
     
     @property
     def stable_clients(self) -> list[StableClient]:

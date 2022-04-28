@@ -10,6 +10,9 @@ import sys
 from state.db import (
     initialise_database_connections,
 )
+from user._testing import (
+    configure_test_user,
+)
 
 # Router imports.
 from handlers.bancho.router import router as bancho_router
@@ -24,7 +27,8 @@ except ImportError:
     error("Uvloop could not be installed! Expect degraded performance.")
 
 _STARTUP_TASKS = (
-    #initialise_database_connections(),
+    initialise_database_connections(),
+    configure_test_user(),
 )
 
 async def on_startup() -> None:
@@ -51,6 +55,7 @@ def main(argv: list[str]) -> int:
             title= "Kisumi",
             openapi_url= None,
             docs_url= None,
+            redoc_url= None,
             debug= DEBUG,
             on_startup= (
                 on_startup,

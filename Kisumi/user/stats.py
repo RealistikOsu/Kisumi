@@ -13,7 +13,7 @@ class ModeStats:
     """An object representing the stats for a particular mode + c_mode
     combo."""
 
-    _user: User
+    _user: "User"
 
     mode: Mode
     c_mode: CustomMode

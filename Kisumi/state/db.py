@@ -27,7 +27,7 @@ async def initialise_database_connections() -> None:
     await redis.set("conn_test", 2)
     val = await redis.get("conn_test")
 
-    assert val == 2, "Redis connection test failed!"
+    assert val == b"2", "Redis connection test failed!"
     await redis.delete("conn_test")
 
     return 0
