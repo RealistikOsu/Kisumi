@@ -1,0 +1,16 @@
+{
+    "metadata": {
+        "name": "English (UK) Locale",
+        "description": "The localisation for the English (UK) language.",
+        "version": 1,
+        "data_type": 0
+    },
+    "data": [
+        {
+            "locale_id": 0,
+            "text": {
+                "welcome_text_1": "Welcome to {0}! We currently have {1} members online!"
+            }
+        }
+    ]
+}

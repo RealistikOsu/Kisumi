@@ -1,7 +1,7 @@
 from starlette.routing import Host
 from fastapi.applications import FastAPI
 from logger import error, DEBUG, info
-from state import config
+from state import config, repos
 import asyncio
 import uvicorn
 import sys
@@ -29,6 +29,7 @@ except ImportError:
 _STARTUP_TASKS = (
     initialise_database_connections(),
     configure_test_user(),
+    repos.json_loader.load(),
 )
 
 async def on_startup() -> None:
