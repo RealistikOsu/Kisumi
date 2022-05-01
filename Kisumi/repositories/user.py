@@ -1,5 +1,7 @@
 # User related repositories.
 from abc import ABC, abstractmethod
+import asyncio
+from re import L
 from typing import (
     TYPE_CHECKING,
     Iterable,
@@ -7,6 +9,8 @@ from typing import (
 )
 
 if TYPE_CHECKING:
+    from user.client.components.auth import TokenString
+    from user.client.client import StableClient
     from user.user import User
 
 class AbstractUserRepo(ABC):
@@ -128,3 +132,52 @@ class UserRepo(AbstractUserRepo):
         """
 
         return self._repo.get(user_id)
+
+#class StableClientsRepo(AbstractUserRepo):
+class StableClientsRepo:
+    """A thread-safe repository for storing online users."""
+
+    def __init__(self) -> None:
+        # Different indexes
+        self._stable_repo: dict["TokenString", "StableClient"] = {}
+        self._lock = asyncio.Lock()
+    
+    def __len__(self) -> int:
+        return len(self._stable_repo)
+    
+    # Private methods
+    def __insert_client(self, client: "StableClient") -> None:
+        """Inserts a client identified by a tokenstring."""
+
+        self._stable_repo[client.auth.token] = client
+    
+    def __get_client(self, ts: "TokenString") -> Optional["StableClient"]:
+        """Attemtps to fetch a client by the TokenString `ts`."""
+
+        return self._stable_repo.get(ts)
+    
+    async def __remove_client(self, ts: "TokenString") -> bool:
+        """Removes a client from the online users list."""
+    
+    # Public methods.
+    async def insert_client(self, client: "StableClient") -> bool:
+        """Marks a stable client as online."""
+
+        async with self._lock:
+            self.__insert_client()
+            return True
+    
+    async def get(self, ts: "TokenString") -> Optional["StableClient"]:
+        """Gets a client from a tokenstring instance"""
+
+        async with self._lock:
+            return self.__get_client(ts)
+    
+    async def broadcast(self, data: bytearray) -> None:
+        """Broadcasts a set of packets to all members of the repo."""
+
+        # Create a copy so we dont acquire the lock for extended periods of time.
+        # TODO: Investigate whether this should actually be done.
+        repo_copy = self._stable_repo.copy()
+        for client in repo_copy.values():
+            await client.queue.append(data)

@@ -43,7 +43,7 @@ class StableAuthComponent(AbstractAuthComponent):
     __slots__ = (
         "_lock",
         "_pw_bcrypt",
-        "_token",
+        "token",
         "_cached_md5",
         "_user",
     )
@@ -54,10 +54,10 @@ class StableAuthComponent(AbstractAuthComponent):
         self._lock = asyncio.Lock()
         self._pw_bcrypt = pw
         self._cached_md5 = None
-        self._token = token
+        self.token = token
         self._user = user
     
-    async def generate_token(self) -> str:
+    async def generate_token(self) -> TokenString:
         """Generates a random one-time use token that may be utilised within
         authentication. Acquires the authentication lock."""
 
@@ -68,14 +68,14 @@ class StableAuthComponent(AbstractAuthComponent):
         """Generates a random one-time use token that may be utilised within
         authentication."""
 
-        self._token = TokenString(self._user.id, _get_unique_token())
-        return self._token
+        self.token = TokenString(self._user.id, _get_unique_token())
+        return self.token
     
     def __compare_token(self, token: "TokenString") -> bool:
         """Compares a token to the stored token."""
 
-        if self._token:
-            return self._token == token
+        if self.token:
+            return self.token == token
         
         return False
     
@@ -131,14 +131,6 @@ class StableAuthComponent(AbstractAuthComponent):
         async with self._lock:
             self.__clear_cached_pw()
             raise NotImplementedError
-    
-    def into_token_string(self) -> "TokenString":
-        """Creates an instance of `TokenString` from the token data provided."""
-
-        return TokenString(
-            self._user.id,
-            self._token,
-        )
 
 class TokenString:
     """A string denoting a user ID and token combo, used for bancho authentication.
@@ -162,11 +154,13 @@ class TokenString:
         return self.into_auth_str()
     
     def __eq__(self, o: object) -> bool:
-        if isinstance(o, TokenString):
-            return o.token == self.token \
-                and o.user_id == self.user_id
+        return isinstance(o, TokenString) \
+            and o.token == self.token \
+            and o.user_id == self.user_id
         
-        return False
+    
+    def __hash__(self) -> int:
+        return hash(self.token)
     
     @staticmethod
     def from_auth_str(auth_str: Optional[str]) -> Optional["TokenString"]:

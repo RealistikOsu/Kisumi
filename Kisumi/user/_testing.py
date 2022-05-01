@@ -15,6 +15,7 @@ async def configure_test_user() -> None:
         [],
         None,
         BCryptPassword.from_str("bruhh"),
+        None,
     )
 
     REALISTIK_STATS = Stats(

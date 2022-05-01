@@ -11,7 +11,7 @@ class PacketIDs(IntEnum):
     OSU_LOGOUT = 2
     OSU_REQUEST_STATUS_UPDATE = 3
     OSU_HEARTBEAT = 4
-    SRV_USER_ID = 5
+    SRV_LOGIN_REPONSE = 5
     SRV_SEND_MESSAGE = 7
     SRV_HEARTBEAT = 8
     SRV_USER_STATS = 11
@@ -108,3 +108,15 @@ class PacketIDs(IntEnum):
     SRV_SWITCH_TOURNAMENT_SERVER = 107
     OSU_TOURNAMENT_JOIN_MATCH_CHANNEL = 108
     OSU_TOURNAMENT_LEAVE_MATCH_CHANNEL = 109
+
+class LoginReply(IntEnum):
+    """Enumeration for the login response IDs."""
+
+    FAILED = -1
+    OUTDATED_CLIENT = -2
+    BANNED = -3 # TODO: find a way to make these 2 eq.
+    BANNED_2 = -4 # They are handled by the same case statement in the client.
+    BANCHO_ERROR = -5
+    SUPPORTER_REQUIRED = -6
+    PASSWORD_RESET = -7
+    VERIFICATION_REQUIRED = -8

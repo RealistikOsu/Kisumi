@@ -31,14 +31,16 @@ async def main_post(req: Request) -> Response:
 
     # Packet request.
     if auth_token:
+        data = b""
+        token = None
         ...
     # Login attempt
     else:
         data, token = await login_handle(req)
         
-        return Response(
-            content= data,
-            headers= {
-                "cho_token": token.into_auth_str() if token else "no",
-            },
-        )
+    return Response(
+        content= data,
+        headers= {
+            "cho_token": token.into_auth_str() if token else "no",
+        },
+    )
