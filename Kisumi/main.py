@@ -74,8 +74,8 @@ def main(argv: list[str]) -> int:
             ),
         ),
         port= config.SERVER_PORT,
-        access_log= False,
-        log_level= "error",
+        #access_log= False,
+        #log_level= "error",
     )
     return 0
 

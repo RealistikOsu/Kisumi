@@ -19,10 +19,13 @@ class User:
     """An object representing a server user, alongside associated functionality."""
 
     id: int
+    name: str
+    email: str
     stats: Stats
     clients: list[AbstractClient] # Ordered by priority
     scores: Any # Iterable object holding a list of top 100 scores and able to fetch more.
     password: BCryptPassword
+    notifications: Any
 
     ...
 

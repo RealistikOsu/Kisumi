@@ -134,6 +134,35 @@ class UserRepo(AbstractUserRepo):
         return self._repo.get(user_id)
 
 #class StableClientsRepo(AbstractUserRepo):
+class _StableClientsIter:
+    """An iterator over all stable clients."""
+
+    __slots__ = (
+        "_repo",
+        "_idx",
+        "_repo_len",
+    )
+
+    def __init__(self, repo: "StableClientsRepo") -> None:
+        # TODO: Pass the data directly rather than use private variables.
+        self._repo = repo
+        self._repo_len = len(repo) # Cache this
+        self._repo_val_iter = None
+
+    async def init_iter(self) -> None:
+        await self._repo._lock.acquire()
+        self._repo_val_iter = iter(self._repo._stable_repo.values())
+    
+    async def __anext__(self) -> "StableClient":
+        """Returns the next indexed client."""
+        
+        try:
+            return next(self._repo_val_iter)
+        except StopIteration:
+            await self._repo._lock.release()
+            raise StopAsyncIteration
+    
+
 class StableClientsRepo:
     """A thread-safe repository for storing online users."""
 
@@ -144,6 +173,13 @@ class StableClientsRepo:
     
     def __len__(self) -> int:
         return len(self._stable_repo)
+    
+    async def __aiter__(self) -> "_StableClientsIter":
+        """Stats a locked async iteration over all clients."""
+
+        iterator = _StableClientsIter(self)
+        await iterator.init_iter()
+        return iterator
     
     # Private methods
     def __insert_client(self, client: "StableClient") -> None:
@@ -164,7 +200,7 @@ class StableClientsRepo:
         """Marks a stable client as online."""
 
         async with self._lock:
-            self.__insert_client()
+            self.__insert_client(client)
             return True
     
     async def get(self, ts: "TokenString") -> Optional["StableClient"]:

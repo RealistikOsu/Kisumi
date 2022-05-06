@@ -146,9 +146,10 @@ class BinaryWriter:
         """Completes packet serialisation by writing the packet header to the front."""
 
         # FIXME: Bruh.
-        assert self._buffer[0:6] == NULL_HEADER, "Attempted to write into a non-empty header!"
-        self._buffer[0:1] = struct.pack("<H", packet_id.value)
-        self._buffer[3:6] = struct.pack("<I", len(self._buffer) - HEADER_LEN)
+        #assert self._buffer[0:6] == NULL_HEADER, "Attempted to write into a non-empty header!"
+        #self._buffer[0:1] = struct.pack("<H", packet_id.value)
+        #self._buffer[3:6] = struct.pack("<I", len(self._buffer) - HEADER_LEN)
+        self._buffer[0:7] = struct.pack("<HxI", packet_id.value, len(self._buffer) - HEADER_LEN)
         return self._buffer
 
 

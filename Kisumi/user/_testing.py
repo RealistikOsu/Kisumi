@@ -11,6 +11,8 @@ async def configure_test_user() -> None:
 
     REALISTIK_USER = User(
         1000,
+        "RealistikDash",
+        "realistik@da.sh",
         None,
         [],
         None,

@@ -18,7 +18,7 @@ class ByteBuffer:
         self._buf = bytearray()
     
     @staticmethod
-    def new(self) -> "ByteBuffer":
+    def new() -> "ByteBuffer":
         """Creates an empty instance of ByteBuffer."""
 
         return ByteBuffer(bytearray())

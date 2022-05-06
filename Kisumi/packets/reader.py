@@ -19,12 +19,38 @@ class BinaryReader:
         self._buffer = buffer
         self._offset = 0
     
+    def __iter__(self) -> "BinaryReader":
+        return self
+
+    def __next__(self) -> tuple[u16, u32]:
+        """Iterates over the reader until its empty, reading the byte header.
+        
+        Note:
+            REQUIRES YOU TO SKIP THE DATA MANUALLY IF NOT READ.
+        
+        Returns:
+            tuple of the packet ID and length.
+        """
+
+        if self.empty:
+            raise StopIteration
+        
+        packet_id = self.read_u16()
+        self.skip(1) # Pad
+        length = self.read_u32()
+        return packet_id, length
+    
+    @property
+    def empty(self) -> bool:
+        """Bool corresponding to whether the buffer has been fully read."""
+
+        return self._offset + 1 >= len(self._buffer)
+    
     def read_bytes(self, amount: int) -> Union[bytearray, bytes]:
         """Reads `amount` bytes from the current offset and increments the
         offset of the reader by `amount`. Returns the buffer slice."""
 
         buf_slice = self._buffer[self._offset:self.__incr_offset(amount)]
-        self._offset += amount
         return buf_slice
     
     def __incr_offset(self, amount: int) -> int:
@@ -122,3 +148,11 @@ class BinaryReader:
         
         length = self.read_uleb128()
         return self.read_bytes(length).decode()
+
+    def skip(self, x: int) -> int:
+        """Skips `x` bytes in the buffer.
+        
+        Returns current reader increment.
+        """
+
+        return self.__incr_offset(x)

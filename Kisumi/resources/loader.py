@@ -102,5 +102,5 @@ def _crawl_json_documents() -> list[str]:
     return [
         os.path.join(dirpath, filename)
         for dirpath, _, filenames in os.walk('.')
-        if filename.endswith('.json')
+        for filename in filenames if filename.endswith('.json')
     ]

@@ -11,7 +11,7 @@ from .login import login_handle
 
 # The page people get if they access this from their web browser.
 @router.route("/", methods= ["GET"])
-async def main_get() -> PlainTextResponse:
+async def main_get(req: Request) -> PlainTextResponse:
     return PlainTextResponse(
         f"{config.SERVER_NAME} - Powered by Kisumi!"
     )
@@ -22,7 +22,7 @@ async def main_post(req: Request) -> Response:
 
     # Only allow osu! clients past this point.
     if req.headers.get("User-Agent") != "osu!":
-        return await main_get()
+        return await main_get(req)
 
     # Select whether this is a login request or a packet request.
     auth_token = TokenString.from_auth_str(
@@ -32,15 +32,18 @@ async def main_post(req: Request) -> Response:
     # Packet request.
     if auth_token:
         data = b""
-        token = None
+        token = auth_token
         ...
     # Login attempt
     else:
         data, token = await login_handle(req)
+
+    print(data)
+    print(f"{token!r}")
         
     return Response(
-        content= data,
+        content= bytes(data),
         headers= {
-            "cho_token": token.into_auth_str() if token else "no",
+            "cho-token": token.into_auth_str() if token else "no",
         },
     )

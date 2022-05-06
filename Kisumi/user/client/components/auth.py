@@ -57,14 +57,14 @@ class StableAuthComponent(AbstractAuthComponent):
         self.token = token
         self._user = user
     
-    async def generate_token(self) -> TokenString:
+    async def generate_token(self) -> "TokenString":
         """Generates a random one-time use token that may be utilised within
         authentication. Acquires the authentication lock."""
 
         async with self._lock:
             return self.__generate_token()
     
-    def __generate_token(self) -> str:
+    def __generate_token(self) -> "TokenString":
         """Generates a random one-time use token that may be utilised within
         authentication."""
 

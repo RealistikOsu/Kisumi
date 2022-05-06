@@ -1,8 +1,10 @@
-from .user import User
 from utils.singleton import Singleton
 from repositories.user import UserRepo
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 import asyncio
+
+if TYPE_CHECKING:
+    from .user import User
 
 class UserManager(Singleton):
     """A class for managing and creating instances of users."""
@@ -17,7 +19,7 @@ class UserManager(Singleton):
         self._lock = asyncio.Lock()
     
     # Private methods.
-    async def __get_user(self, user_id: int) -> Optional[User]:
+    async def __get_user(self, user_id: int) -> Optional["User"]:
         """Attempts to retrieve an insance of `User` with the given ID from
         the cache or database (the sources are checked in the order listed).
         
@@ -26,14 +28,14 @@ class UserManager(Singleton):
             this one does not acquire the lock.
         """
     
-        if (user := self._repo.get(user_id)):
+        if (user := await self._repo.get(user_id)):
             return user
             
         # Db logic.
         ...
 
     # Public methods.
-    async def get_user(self, user_id: int) -> Optional[User]:
+    async def get_user(self, user_id: int) -> Optional["User"]:
         """Attempts to retrieve an insance of `User` with the given ID from
         the cache or database (the sources are checked in the order listed).
         
