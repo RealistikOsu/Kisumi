@@ -11,6 +11,22 @@ from typing import Optional
 class LoginRequestModel(BaseModel):
     """A validated model for login data."""
 
+    username: str
+    password_md5: str
+    osu_version: str
+    utc_timezone: int
+    display_city: bool
+    allow_dms: bool
+    osu_path_md5: str
+    adapters: str
+    adapters_md5: str
+    uninstall_md5: str
+    serial_md5: str
+
+    @staticmethod
+    def from_req_body(body: str) -> "LoginRequestModel":
+        """"""
+
 async def login_handle(
     request: Request,
 ) -> tuple[bytearray, Optional[TokenString]]:
@@ -24,9 +40,17 @@ async def login_handle(
         "b",
         "b",
     )
+    user_id = 1000
 
     # Fetch user object.
-    user = await user_manager.get_user(1000)
+    user = await user_manager.get_user(user_id)
+
+    # TODO: Is online check.
+    if user.stable_client:
+        return (
+              packet.notification("You already seem to have been logged in...")
+            + packet.login_reply(LoginReply.FAILED)
+        ), None
 
     if user is None:
         return packet.login_reply(LoginReply.FAILED), None
@@ -35,6 +59,11 @@ async def login_handle(
     client = await StableClient.from_login(
         hwid,
     )
+
+    # Auth
+    if not await client.auth.authenticate("bruhh"):
+        return packet.login_reply(LoginReply.FAILED), None
+
     await user.insert_client(client)
     await stable_clients.insert_client(client)
 

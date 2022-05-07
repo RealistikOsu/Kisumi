@@ -5,6 +5,7 @@ from user.user import User
 from user.stats import Stats, ModeStats
 from scores.constants.mode import CustomMode, Mode
 from state.repos import user_manager
+from utils.hash import hash_md5
 
 async def configure_test_user() -> None:
     """Configures a user instance made for testing."""
@@ -16,7 +17,7 @@ async def configure_test_user() -> None:
         None,
         [],
         None,
-        BCryptPassword.from_str("bruhh"),
+        BCryptPassword.from_str(hash_md5("bruhh")),
         None,
     )
 

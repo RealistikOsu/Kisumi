@@ -1,4 +1,5 @@
 import bcrypt
+import hashlib
 import asyncio
 
 PW_PREFIX = "$2b$10$"
@@ -129,3 +130,8 @@ async def hash_bcrypt_async(password: str) -> bytes:
         hash_bcrypt,
         password,
     )
+
+def hash_md5(text: str) -> str:
+    """Hashes `text` into 16bit hexdigested MD5."""
+
+    return hashlib.md5(text).hexdigest()

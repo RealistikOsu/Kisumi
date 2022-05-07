@@ -18,3 +18,6 @@ DATA_DIR = config("DATA_DIR", cast= Path)
 SERVER_NAME = config("SERVER_NAME", cast= str, default= "RealistikOsu")
 SERVER_DOMAIN = config("SERVER_DOMAIN", cast= str, default= "ussr.pl")
 SERVER_PORT = config("SERVER_PORT", cast= int, default= 5344)
+
+CRYPT_JWT_SECRET = config("CRYPT_JWT_SECRET", cast= str, default= "very secret")
+CRYPT_JWT_EXPIRY = config("CRYPT_JWT_EXPIRY", cast= int, default= 172800)

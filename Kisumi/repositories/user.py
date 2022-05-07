@@ -1,7 +1,6 @@
 # User related repositories.
 from abc import ABC, abstractmethod
 import asyncio
-from re import L
 from typing import (
     TYPE_CHECKING,
     Iterable,
