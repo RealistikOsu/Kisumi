@@ -1,7 +1,7 @@
 # Builders for all currently implemented response packets.
 from .writer import BinaryWriter
 from .constants import (
-    PacketIDs,
+    PacketID,
     LoginReply,
 )
 from typing import Union, TYPE_CHECKING
@@ -17,7 +17,7 @@ def heartbeat() -> bytearray:
 
     return (
         BinaryWriter()
-            .finish(PacketIDs.SRV_HEARTBEAT)
+            .finish(PacketID.SRV_HEARTBEAT)
     )
 
 def notification(content: str) -> bytearray:
@@ -26,7 +26,7 @@ def notification(content: str) -> bytearray:
     return (
         BinaryWriter()
             .write_str(content)
-            .finish(PacketIDs.SRV_NOTIFICATION)
+            .finish(PacketID.SRV_NOTIFICATION)
     )
 
 def login_reply(resp_val: Union[int, LoginReply]) -> bytearray:
@@ -38,7 +38,7 @@ def login_reply(resp_val: Union[int, LoginReply]) -> bytearray:
                 resp_val.value if isinstance(resp_val, LoginReply)
                 else resp_val
             )
-            .finish(PacketIDs.SRV_LOGIN_REPONSE)
+            .finish(PacketID.SRV_LOGIN_REPONSE)
     )
 
 @cache
@@ -47,12 +47,14 @@ def channel_info_end() -> bytearray:
 
     return (
         BinaryWriter()
-            .finish(PacketIDs.SRV_CHANNEL_INFO_END)
+            .finish(PacketID.SRV_CHANNEL_INFO_END)
     )
 
 # TODO: Remove placeholder data
 def presence(user: "User") -> bytearray:
     """Builds a presence for a user's main client."""
+
+    return presence_client(user.client)
 
 def presence_client(client: "AbstractClient") -> bytearray:
     """Builds a presence for a specific client."""
@@ -67,5 +69,5 @@ def presence_client(client: "AbstractClient") -> bytearray:
             .write_u8(0) # Lat
             .write_u8(0) # Long
             .write_i32(client.current_stats.rank) # Get current rank based on client
-            .finish(PacketIDs.SRV_USER_PRESENCE)
+            .finish(PacketID.SRV_USER_PRESENCE)
     )

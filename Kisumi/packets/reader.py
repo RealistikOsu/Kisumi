@@ -1,8 +1,10 @@
 # An implementation of a binary deserialiser for usage with 
-from .constants import HEADER_LEN
+from .constants import PacketID
 from .types import *
-from typing import Union
+from typing import Union, TypeVar, Type
 import struct
+
+T = TypeVar("T")
 
 class BinaryReader:
     """A binary-deserialisation class managing a buffer of bytes. Tailored for
@@ -22,7 +24,7 @@ class BinaryReader:
     def __iter__(self) -> "BinaryReader":
         return self
 
-    def __next__(self) -> tuple[u16, u32]:
+    def __next__(self) -> tuple[PacketID, u32]:
         """Iterates over the reader until its empty, reading the byte header.
         
         Note:
@@ -38,7 +40,7 @@ class BinaryReader:
         packet_id = self.read_u16()
         self.skip(1) # Pad
         length = self.read_u32()
-        return packet_id, length
+        return PacketID(packet_id), length
     
     @property
     def empty(self) -> bool:
@@ -156,3 +158,26 @@ class BinaryReader:
         """
 
         return self.__incr_offset(x)
+    
+    def read_type(self, t: Type[T]) -> T:
+        """Reads an item from the buffer of type `t`. Preforms reader selection
+        and returns the value.
+        
+        Note:
+            Raises `KeyError` if the type is not valid.
+        """
+
+        return TYPE_READER_MAP[t](self)
+
+TYPE_READER_MAP = {
+    str: BinaryReader.read_str,
+    float: BinaryReader.read_f32,
+    i8: BinaryReader.read_i8,
+    u8: BinaryReader.read_u8,
+    i16: BinaryReader.read_i16,
+    u16: BinaryReader.read_u16,
+    i32: BinaryReader.read_i32,
+    u32: BinaryReader.read_u32,
+    i64: BinaryReader.read_i64,
+    u64: BinaryReader.read_u64,
+}

@@ -29,7 +29,7 @@ class LoginRequestModel(BaseModel):
 
 async def login_handle(
     request: Request,
-) -> tuple[bytearray, Optional[TokenString]]:
+) -> tuple[bytearray, Optional[str]]:
     """Handles the authentication process."""
 
     # Parse data.

@@ -3,7 +3,7 @@ from enums import IntEnum
 # The length of the bancho packet header (u16 + pad + u32)
 HEADER_LEN = 7
 
-class PacketIDs(IntEnum):
+class PacketID(IntEnum):
     """An enumeration of all current osu! packet IDs."""
 
     OSU_CHANGE_ACTION = 0

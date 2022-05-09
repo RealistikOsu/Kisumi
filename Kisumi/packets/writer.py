@@ -7,7 +7,7 @@ from typing import (
     Type,
 )
 from functools import cache
-from .constants import HEADER_LEN, PacketIDs
+from .constants import HEADER_LEN, PacketID
 from .types import *
 import struct
 
@@ -142,7 +142,7 @@ class BinaryWriter:
         self._buffer += contents
         return self
     
-    def finish(self, packet_id: PacketIDs) -> bytearray:
+    def finish(self, packet_id: PacketID) -> bytearray:
         """Completes packet serialisation by writing the packet header to the front."""
 
         # FIXME: Bruh.
