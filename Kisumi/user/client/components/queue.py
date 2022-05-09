@@ -1,7 +1,7 @@
 from typing import Union
 import asyncio
 
-ACCEPTED_TYPES = Union[bytes, bytearray]
+ByteLike = Union[bytes, bytearray]
 
 class ByteBuffer:
     """A thread-safe implementation of a buffer of bytes."""
@@ -30,7 +30,7 @@ class ByteBuffer:
         # should this be locked?
         return len(self._buf) == 0
     
-    async def append(self, e: ACCEPTED_TYPES) -> None:
+    async def append(self, e: ByteLike) -> None:
         """Appends `e` to the end of the buffer, acquiring the lock in the
         process."""
 

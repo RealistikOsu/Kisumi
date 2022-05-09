@@ -80,5 +80,7 @@ async def login_handle(
         + packet.channel_info_end()
     )
 
+    # Grant authentication token
+    token = client.auth.generate_jwt()
 
-    return await client.queue.clear(), client.auth.token
+    return await client.queue.clear(), token

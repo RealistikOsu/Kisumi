@@ -5,11 +5,13 @@ from typing import (
     TYPE_CHECKING,
     Iterable,
     Optional,
+    AsyncGenerator,
 )
+from user.client.constants.client import ClientType
+from user.client.components.queue import ByteLike
 
 if TYPE_CHECKING:
-    from user.client.components.auth import TokenString
-    from user.client.client import StableClient
+    from user.client.client import AbstractClient, StableClient
     from user.user import User
 
 class AbstractUserRepo(ABC):
@@ -132,87 +134,67 @@ class UserRepo(AbstractUserRepo):
 
         return self._repo.get(user_id)
 
-#class StableClientsRepo(AbstractUserRepo):
-class _StableClientsIter:
-    """An iterator over all stable clients."""
+class AsyncUserRepo(UserRepo):
+    """A thread-safe variant of the `UserRepo`. Thin wrapper around all functions,
+    acquiring the repo lock."""
+
+    def __init__(self, name: Optional[str] = None) -> None:
+        super().__init__(name)
+        self._lock = asyncio.Lock()
+    
+    async def insert(self, user: "User") -> bool:
+        async with self._lock:
+            return await super().insert(user)
+    
+    async def remove_id(self, user_id: int) -> bool:
+        async with self._lock:
+            return await super().remove_id(user_id)
+    
+    async def remove(self, user: "User") -> bool:
+        async with self._lock:
+            return await super().remove(user)
+    
+    async def get(self, user_id: int) -> Optional["User"]:
+        async with self._lock:
+            return await super().get(user_id)
+    
+    async def __aiter__(self) -> AsyncGenerator["User", None, None]:
+        """Returns an asynchronous iterator over the entire repo."""
+
+        async def _iter() -> AsyncGenerator["User", None, None]:
+            async with self._lock:
+                for user in self._repo.values():
+                    yield user
+        
+        return await _iter()
+
+class OnlineUsersRepo:
+    """A repository of all online users."""
 
     __slots__ = (
         "_repo",
-        "_idx",
-        "_repo_len",
     )
 
-    def __init__(self, repo: "StableClientsRepo") -> None:
-        # TODO: Pass the data directly rather than use private variables.
-        self._repo = repo
-        self._repo_len = len(repo) # Cache this
-        self._repo_val_iter = None
-
-    async def init_iter(self) -> None:
-        await self._repo._lock.acquire()
-        self._repo_val_iter = iter(self._repo._stable_repo.values())
-    
-    async def __anext__(self) -> "StableClient":
-        """Returns the next indexed client."""
-        
-        try:
-            return next(self._repo_val_iter)
-        except StopIteration:
-            await self._repo._lock.release()
-            raise StopAsyncIteration
-    
-
-class StableClientsRepo:
-    """A thread-safe repository for storing online users."""
-
     def __init__(self) -> None:
-        # Different indexes
-        self._stable_repo: dict["TokenString", "StableClient"] = {}
-        self._lock = asyncio.Lock()
+        self._repo = AsyncUserRepo("OnlineUsersRepo")
     
-    def __len__(self) -> int:
-        return len(self._stable_repo)
-    
-    async def __aiter__(self) -> "_StableClientsIter":
-        """Stats a locked async iteration over all clients."""
+    async def clients(self) -> AsyncGenerator["AbstractClient", None, None]:
+        """A generator over all of the users' main clients."""
 
-        iterator = _StableClientsIter(self)
-        await iterator.init_iter()
-        return iterator
+        #return (user async for client in self._repo)
+        async for user in self._repo:
+            yield user.client
     
-    # Private methods
-    def __insert_client(self, client: "StableClient") -> None:
-        """Inserts a client identified by a tokenstring."""
+    async def stable_clients(self) -> AsyncGenerator["StableClient", None, None]:
+        """Async generator over all users with a stable client."""
 
-        self._stable_repo[client.auth.token] = client
+        async for client in self.clients():
+            if client.type == ClientType.STABLE:
+                yield client
     
-    def __get_client(self, ts: "TokenString") -> Optional["StableClient"]:
-        """Attemtps to fetch a client by the TokenString `ts`."""
+    async def broadcast(self, b: ByteLike) -> None:
+        """Broadcasts a sequence of bytes to all users."""
 
-        return self._stable_repo.get(ts)
+        async for client in self.stable_clients():
+            await client.queue.append(b)
     
-    async def __remove_client(self, ts: "TokenString") -> bool:
-        """Removes a client from the online users list."""
-    
-    # Public methods.
-    async def insert_client(self, client: "StableClient") -> bool:
-        """Marks a stable client as online."""
-
-        async with self._lock:
-            self.__insert_client(client)
-            return True
-    
-    async def get(self, ts: "TokenString") -> Optional["StableClient"]:
-        """Gets a client from a tokenstring instance"""
-
-        async with self._lock:
-            return self.__get_client(ts)
-    
-    async def broadcast(self, data: bytearray) -> None:
-        """Broadcasts a set of packets to all members of the repo."""
-
-        # Create a copy so we dont acquire the lock for extended periods of time.
-        # TODO: Investigate whether this should actually be done.
-        repo_copy = self._stable_repo.copy()
-        for client in repo_copy.values():
-            await client.queue.append(data)

@@ -35,3 +35,16 @@ class Action:
             prefix = "Web"
         
         return f"[{prefix}] {self._text}"
+    
+    @staticmethod
+    def new() -> "Action":
+        """Creates a default instance of `Action` and returns it."""
+
+        return Action(
+            id= Actions.IDLE,
+            _text= "",
+            bmap= None,
+            mode= Mode.STANDARD,
+            c_mode= CustomMode.VANILLA,
+            mods= None, # TODO: Once mod enum is implemented.
+        )

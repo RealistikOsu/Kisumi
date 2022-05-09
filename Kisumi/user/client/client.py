@@ -8,6 +8,7 @@ from .components.auth import (
 from .components.queue import ByteBuffer
 from .constants.client import ClientType
 from .components.hwid import StableHWID
+from .components.action import Action
 from state.repos import stable_clients
 from typing import (
     TYPE_CHECKING,
@@ -27,6 +28,7 @@ class AbstractClient(ABC):
     auth: AbstractAuthComponent
     chat: AbstractChatComponent
     user: Optional["User"]
+    action: Action
     ...
 
     @abstractmethod
@@ -79,6 +81,7 @@ class StableClient(AbstractClient):
             user= None,
             queue= ByteBuffer.new(),
             hwid= hwid,
+            action= Action.new()
         )
 
     async def logout(self) -> None:

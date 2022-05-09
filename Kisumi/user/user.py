@@ -59,13 +59,19 @@ class User:
     def stable_clients(self) -> list[StableClient]:
         """Returns a list of all attached clients with the type `ClientType.STABLE`."""
 
-        return [cl for cl in self.clients if cl.type is ClientType.STABLE]
+        return [cl for cl in self.stable_clients_generator]
     
     @property
     def stable_clients_generator(self) -> Generator[StableClient, None, None]:
         """Same as `User.stable_clients` except returns a generator."""
         return (cl for cl in self.clients if cl.type is ClientType.STABLE)
     
+    @property
+    def client(self) -> Optional[AbstractClient]:
+        """Returns the user's primary client if attached."""
+
+        return self.clients[0] if self.clients else None
+
     @property
     def online(self) -> bool:
         """Checks if the user has any clients attached to it."""

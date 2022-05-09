@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from time import time
 from typing import (
     TYPE_CHECKING,
+    Optional,
 )
 from .constants.tokens import AuthType
 from utils.hash import BCryptPassword
@@ -67,17 +68,27 @@ class StableAuthComponent(AbstractAuthComponent):
     
     def generate_jwt(self) -> str:
         """Generates a new auth JWT for the user, managing expiry."""
+
+        return encode_jwt_dict(
+            self.generate_jwt_dict()
+        )
     
     def __confirm_jwt(self, jwt: str) -> bool:
         """Checks if the given JWT is valid, considering signing and expiry."""
 
-        if self.token:
-            return self.token == token
-        
-        return False
+        return self.__confirm_jwt_dict(
+            decode_jwt_str(jwt)
+        )
     
-    def __confirm_jwt_dict(self, jwt: AuthJWT) -> bool:
-        """Confirms an already decoded jwt"""
+    def __confirm_jwt_dict(self, jwt_dec: Optional[AuthJWT] = None) -> bool:
+        """Confirms an already decoded jwt."""
+
+        if not jwt_dec:
+            return False
+        
+        return jwt_dec["user_id"] == self._user.id \
+            and jwt_dec["type"] == AuthType.STABLE \
+            and confirm_token_expiry(jwt_dec)
     
     async def clear_cached_password(self) -> None:
         """Clears the cached password MD5 for the user, forcing the MD5 to
