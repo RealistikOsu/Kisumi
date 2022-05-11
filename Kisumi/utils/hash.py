@@ -95,8 +95,8 @@ class BCryptPassword:
         """Compares the BCrypt bytes `bc` to the one stored in the object."""
 
         return bcrypt.checkpw(
-            self._bcrypt_pw,
             bc,
+            self._bcrypt_pw,
         )
 
     async def __compare_async(self, bc: bytes) -> bool:
@@ -134,4 +134,4 @@ async def hash_bcrypt_async(password: str) -> bytes:
 def hash_md5(text: str) -> str:
     """Hashes `text` into 16bit hexdigested MD5."""
 
-    return hashlib.md5(text).hexdigest()
+    return hashlib.md5(text.encode()).hexdigest()

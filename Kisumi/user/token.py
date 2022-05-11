@@ -1,11 +1,9 @@
 from .client.components.constants.tokens import AuthType
 from state import config
 from typing import TypedDict, Optional
-from jwt import JWT
-from jwt.exceptions import JWTDecodeError
 import time
+import jwt
 
-jwt_enc = JWT()
 
 class AuthJWT(TypedDict):
     """Type annotations for the authentication JWT."""
@@ -23,20 +21,20 @@ def encode_jwt_dict(jwt_d: AuthJWT) -> str:
     jwt_d_copy = jwt_d.copy()
     jwt_d_copy['type'] = jwt_d_copy['type'].value
 
-    return jwt_enc.encode(
+    return jwt.encode(
         jwt_d_copy,
-        key= config.CRYPT_JWT_SECRET,
+        config.CRYPT_JWT_SECRET,
     )
 
 def decode_jwt_str(jwt_str: str) -> Optional[AuthJWT]:
     """Decodes a JWT auth str into a dict. Returns `None` on fail."""
 
     try:
-        jwt_dec = jwt_enc.decode(
+        jwt_dec = jwt.decode(
             jwt_str,
-            key= config.CRYPT_JWT_SECRET,
+            config.CRYPT_JWT_SECRET,
         )
-    except JWTDecodeError:
+    except Exception: # TODO: Be more precise.
         return None
     
     jwt_dec["type"] = AuthType(jwt_dec["type"])

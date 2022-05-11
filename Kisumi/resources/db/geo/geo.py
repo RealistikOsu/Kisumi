@@ -44,7 +44,7 @@ class GeolocationDB:
 
         info("Loading the geolocation database...")
 
-        if self.load():
+        if not self.load():
             raise Exception("Failed to load database!")
         
         info("Geolocation database loaded!")

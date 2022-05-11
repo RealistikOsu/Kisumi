@@ -13,3 +13,14 @@ class Settings:
     preferred_c_mode: CustomMode
     language: ...
     overwrite_rules: ...
+
+    @staticmethod
+    def new() -> "Settings":
+        """Creates a default instance of `Settings`."""
+
+        return Settings(
+            preferred_c_mode= CustomMode.VANILLA,
+            preferred_mode= Mode.STANDARD,
+            language= None,
+            overwrite_rules= None,
+        )

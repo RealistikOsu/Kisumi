@@ -28,35 +28,6 @@ class ModeStats:
     max_combo: int
     rank: int
 
-    # XXX: COmmit note: Gonna be using models
-    def into_mongo(self) -> dict[str, Any]:
-        """Converts the ModeStats object into a MongoDB compatible dict."""
-
-        # TODO: Automate this.
-        return {
-            "mode": self.mode.value,
-            "c_mode": self.c_mode.value,
-            "total_score": self.total_score,
-            "ranked_score": self.ranked_score,
-            "pp": self.pp,
-            "play_count": self.play_count,
-            "accuracy": self.accuracy,
-            "max_combo": self.max_combo,
-            # Rank is redis.
-        }
-    
-    @staticmethod
-    def from_mongo(self, user: "User", m_res: dict[str. Any]) -> "ModeStats":
-        """Creates an instance of `ModeStats` from MongoDB data."""
-
-        # Enum casts
-        m_res["mode"] = Mode(m_res["mode"])
-        m_res["c_mode"] = CustomMode(m_res["mode"])
-        return ModeStats(
-            **m_res,
-            rank= 0,
-        )
-
 @dataclass
 class Stats:
     """Object responsible for storing a user's stats for all modes, alongside

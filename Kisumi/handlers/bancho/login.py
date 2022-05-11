@@ -1,12 +1,13 @@
 from packets.constants import LoginReply
-from user.client.components.auth import TokenString
 from user.client.components.hwid import StableHWID
 from user.client.client import StableClient
 from packets import builders as packet
-from state.repos import user_manager, stable_clients
+from state import repos
 from fastapi.requests import Request
 from pydantic import BaseModel
 from typing import Optional
+from utils.request import geolocate_request
+from utils.hash import hash_md5
 
 class LoginRequestModel(BaseModel):
     """A validated model for login data."""
@@ -43,9 +44,8 @@ async def login_handle(
     user_id = 1000
 
     # Fetch user object.
-    user = await user_manager.get_user(user_id)
+    user = await repos.user_manager.get_user(user_id)
 
-    # TODO: Is online check.
     if user.stable_client:
         return (
               packet.notification("You already seem to have been logged in...")
@@ -56,21 +56,19 @@ async def login_handle(
         return packet.login_reply(LoginReply.FAILED), None
 
     # Create client from data
+    location = await geolocate_request(request)
     client = await StableClient.from_login(
-        hwid,
+        user= user,
+        hwid= hwid,
+        location= location,
     )
 
     # Auth
-    if not await client.auth.authenticate("bruhh"):
+    if not await client.auth.authenticate(hash_md5("bruhh")):
         return packet.login_reply(LoginReply.FAILED), None
 
     await user.insert_client(client)
-    await stable_clients.insert_client(client)
-
-    # Broadcast our presence. TODO: mopve to stable_clients.insert_client
-    await stable_clients.broadcast(
-        packet.presence_client(client)
-    )
+    await repos.online.add_user(user)
 
     # Send the user info about the server.
     await client.queue.append(

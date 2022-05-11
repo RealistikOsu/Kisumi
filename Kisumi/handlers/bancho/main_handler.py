@@ -4,7 +4,7 @@ from fastapi.responses import (
     PlainTextResponse,
     Response,
 )
-from user.client.components.auth import TokenString
+from user.token import decode_jwt_str
 from state import config
 
 from .login import login_handle
@@ -25,14 +25,13 @@ async def main_post(req: Request) -> Response:
         return await main_get(req)
 
     # Select whether this is a login request or a packet request.
-    auth_token = TokenString.from_auth_str(
-        req.headers.get("osu-token"),
-    )
+    jwt_str = req.headers.get("osu-token")
+    jwt_dec = decode_jwt_str(jwt_str) if jwt_str else None
 
     # Packet request.
-    if auth_token:
+    if jwt_str:
         data = b""
-        token = auth_token
+        token = jwt_str
         ...
     # Login attempt
     else:
@@ -44,6 +43,6 @@ async def main_post(req: Request) -> Response:
     return Response(
         content= bytes(data),
         headers= {
-            "cho-token": token.into_auth_str() if token else "no",
+            "cho-token": token if token else "no",
         },
     )

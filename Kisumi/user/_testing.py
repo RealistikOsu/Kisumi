@@ -3,6 +3,7 @@
 from utils.hash import BCryptPassword
 from user.user import User
 from user.stats import Stats, ModeStats
+from user.settings import Settings
 from scores.constants.mode import CustomMode, Mode
 from state.repos import user_manager
 from utils.hash import hash_md5
@@ -20,6 +21,7 @@ async def configure_test_user() -> None:
         BCryptPassword.from_str(hash_md5("bruhh")),
         None,
         [],
+        Settings.new(),
     )
 
     REALISTIK_STATS = Stats(
@@ -29,7 +31,7 @@ async def configure_test_user() -> None:
             c_mode,
             0, 0, 0.0, 0, 0, 0.0, 0, 0
         ) for c_mode in CustomMode for mode in Mode},
-        0, 0, Mode.STANDARD, CustomMode.VANILLA, None, None
+        REALISTIK_USER, 0, 0
     )
 
     REALISTIK_USER.stats = REALISTIK_STATS

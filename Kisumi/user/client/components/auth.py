@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from time import time
 from typing import (
     TYPE_CHECKING,
     Optional,
@@ -14,6 +13,7 @@ from user.token import (
 )
 from state import config
 import asyncio
+import time
 
 if TYPE_CHECKING:
     from user.user import User

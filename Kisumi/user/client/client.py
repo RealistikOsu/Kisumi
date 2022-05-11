@@ -9,6 +9,7 @@ from .components.queue import ByteBuffer
 from .constants.client import ClientType
 from .components.hwid import StableHWID
 from .components.action import Action
+from resources.db.geo.iploc import IPLocation
 from typing import (
     TYPE_CHECKING,
     Optional,
@@ -28,6 +29,7 @@ class AbstractClient(ABC):
     chat: AbstractChatComponent
     user: Optional["User"]
     action: Action
+    location: IPLocation
     ...
 
     @abstractmethod
@@ -59,28 +61,26 @@ class StableClient(AbstractClient):
         Note:
             Creates the instance of auth.
         """
-        self.user = user
-        self.auth = StableAuthComponent(
-            user.password,
-            None,
-            user,
-        )
-        await self.auth.generate_token()
-        #await stable_clients.insert_client(self)
+        
+        ...
     
     # Staticmethods/Classmethods
     @staticmethod
-    async def from_login(hwid: StableHWID) -> "StableClient":
+    async def from_login(user: "User", hwid: StableHWID, location: IPLocation) -> "StableClient":
         """Creates a default instance of `StableClient` using data from login."""
 
         return StableClient(
             type= ClientType.STABLE,
-            auth= None,
+            auth= StableAuthComponent(
+                user.password,
+                user,
+            ),
             chat= None,
-            user= None,
             queue= ByteBuffer.new(),
             hwid= hwid,
             action= Action.new(),
+            location= location,
+            user= user,
         )
 
     async def logout(self) -> None:
