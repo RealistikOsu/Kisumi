@@ -2,12 +2,12 @@
 from dataclasses import dataclass
 from utils.hash import BCryptPassword
 from .stats import Stats
+from .settings import Settings
 from .client.constants.client import ClientType
 from .client.client import (
     AbstractClient,
     StableClient,
 )
-from .client.components.auth import TokenString
 from typing import (
     Any,
     Optional,
@@ -26,6 +26,8 @@ class User:
     scores: Any # Iterable object holding a list of top 100 scores and able to fetch more.
     password: BCryptPassword
     notifications: Any
+    name_history: list[str]
+    settings: Settings
 
     ...
 
@@ -90,11 +92,3 @@ class User:
             self.clients.append(client)
         
         await client.on_attach(self)
-    
-    async def stable_client_from_tokenstring(self, token: TokenString) -> Optional[StableClient]:
-        """Iterates over all attached stable clients and returns one with a 
-        matching `TokenString`."""
-
-        for client in self.stable_clients_generator:
-            if await client.auth.authenticate(token):
-                return client

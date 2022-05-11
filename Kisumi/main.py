@@ -1,7 +1,6 @@
 from starlette.routing import Host
 from fastapi.applications import FastAPI
 from logger import error, DEBUG, info
-from state import config, repos
 import asyncio
 import uvicorn
 import sys
@@ -10,6 +9,7 @@ import sys
 from state.db import (
     initialise_database_connections,
 )
+from state import config, repos
 from user._testing import (
     configure_test_user,
 )
@@ -30,6 +30,7 @@ _STARTUP_TASKS = (
     initialise_database_connections(),
     configure_test_user(),
     repos.json_loader.load(),
+    repos.geoloc.kisumi_load(),
 )
 
 async def on_startup() -> None:

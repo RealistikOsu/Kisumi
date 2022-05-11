@@ -158,10 +158,10 @@ class AsyncUserRepo(UserRepo):
         async with self._lock:
             return await super().get(user_id)
     
-    async def __aiter__(self) -> AsyncGenerator["User", None, None]:
+    async def __aiter__(self) -> AsyncGenerator["User", None]:
         """Returns an asynchronous iterator over the entire repo."""
 
-        async def _iter() -> AsyncGenerator["User", None, None]:
+        async def _iter() -> AsyncGenerator["User", None]:
             async with self._lock:
                 for user in self._repo.values():
                     yield user
@@ -178,14 +178,14 @@ class OnlineUsersRepo:
     def __init__(self) -> None:
         self._repo = AsyncUserRepo("OnlineUsersRepo")
     
-    async def clients(self) -> AsyncGenerator["AbstractClient", None, None]:
+    async def clients(self) -> AsyncGenerator["AbstractClient", None]:
         """A generator over all of the users' main clients."""
 
         #return (user async for client in self._repo)
         async for user in self._repo:
             yield user.client
     
-    async def stable_clients(self) -> AsyncGenerator["StableClient", None, None]:
+    async def stable_clients(self) -> AsyncGenerator["StableClient", None]:
         """Async generator over all users with a stable client."""
 
         async for client in self.clients():

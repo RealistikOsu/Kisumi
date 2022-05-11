@@ -9,7 +9,6 @@ from .components.queue import ByteBuffer
 from .constants.client import ClientType
 from .components.hwid import StableHWID
 from .components.action import Action
-from state.repos import stable_clients
 from typing import (
     TYPE_CHECKING,
     Optional,
@@ -67,7 +66,7 @@ class StableClient(AbstractClient):
             user,
         )
         await self.auth.generate_token()
-        await stable_clients.insert_client(self)
+        #await stable_clients.insert_client(self)
     
     # Staticmethods/Classmethods
     @staticmethod
@@ -81,7 +80,7 @@ class StableClient(AbstractClient):
             user= None,
             queue= ByteBuffer.new(),
             hwid= hwid,
-            action= Action.new()
+            action= Action.new(),
         )
 
     async def logout(self) -> None:

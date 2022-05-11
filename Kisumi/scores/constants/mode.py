@@ -1,4 +1,3 @@
-from enum import IntEnum
 from enums import IntEnum
 from functools import cached_property
 
@@ -39,11 +38,4 @@ class Mode(IntEnum):
     def name(self) -> str:
         """Returns the common name of the mode as a string."""
 
-        return _MODE_NAMES[self.value]
-
-_MODE_NAMES = (
-    "standard",
-    "taiko",
-    "catch",
-    "mania",
-)
+        return self.title
