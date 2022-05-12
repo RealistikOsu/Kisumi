@@ -12,6 +12,7 @@ class IPLocation:
     city: str
     country: str
     location: Vector2
+    utc_offset: int
 
     def country_into_enum(self) -> int:
         """Converts the country iso code into an enum used by osu."""
@@ -23,7 +24,7 @@ class IPLocation:
             return 0
     
     @staticmethod
-    def from_city(ip: str, city: City) -> "IPLocation":
+    def from_city(ip: str, city: City, time_zone: int = 0) -> "IPLocation":
         """Creates an instance of `IPLocation` from MMDB IP city data."""
 
         return IPLocation(
@@ -34,6 +35,7 @@ class IPLocation:
                 x= city.location.latitude,
                 y= city.location.longitude,
             ),
+            utc_offset= time_zone,
         )
     
     @staticmethod
@@ -44,5 +46,12 @@ class IPLocation:
             ip= "0.0.0.0",
             city= "NA",
             country= "XX",
-            location= Vector2(0.0, 0.0)
+            location= Vector2(0.0, 0.0),
+            utc_offset= 0,
         )
+    
+    # Yeahh this is compensation for how to share this data with multiple client tyles...
+    def set_time_zone(self, offset: int) -> None:
+        """Sets the time zone for a specific IP to `offset`."""
+
+        self.utc_offset = offset

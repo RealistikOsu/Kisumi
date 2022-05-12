@@ -6,8 +6,11 @@ from fastapi.responses import (
 )
 from user.token import decode_jwt_str
 from state import config
-
+from packets.builders import login_reply
+from packets.constants import LoginReply
 from .login import login_handle
+from logger import error
+import traceback
 
 # The page people get if they access this from their web browser.
 @router.route("/", methods= ["GET"])
@@ -35,7 +38,13 @@ async def main_post(req: Request) -> Response:
         ...
     # Login attempt
     else:
-        data, token = await login_handle(req)
+        try:
+            data, token = await login_handle(req)
+        except Exception:
+            error("An error occured during login!"
+                  + traceback.format_exc())
+            data = login_reply(LoginReply.BANCHO_ERROR)
+            token = None
 
     print(data)
     print(f"{token!r}")

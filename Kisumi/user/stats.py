@@ -48,6 +48,18 @@ class Stats:
             self._user.settings.preferred_c_mode,
             self._user.settings.preferred_mode,
         )
+    
+    @property
+    def current(self) -> "ModeStats":
+        """Returns the user's current ModeStats based on their presence.
+        If not online, returns preferred stats."""
+
+        if self._user.client:
+            return self.from_modes(
+                self._user.client.action.c_mode,
+                self._user.client.action.mode,
+            )
+        return self.preferred
 
     def from_modes(self, c_mode: CustomMode, mode: Mode) -> ModeStats:
         """Returns a user's stats for the corresponding c_mode + mode combo.

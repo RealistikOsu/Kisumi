@@ -4,29 +4,10 @@ from user.client.client import StableClient
 from packets import builders as packet
 from state import repos
 from fastapi.requests import Request
-from pydantic import BaseModel
 from typing import Optional
 from utils.request import geolocate_request
 from utils.hash import hash_md5
-
-class LoginRequestModel(BaseModel):
-    """A validated model for login data."""
-
-    username: str
-    password_md5: str
-    osu_version: str
-    utc_timezone: int
-    display_city: bool
-    allow_dms: bool
-    osu_path_md5: str
-    adapters: str
-    adapters_md5: str
-    uninstall_md5: str
-    serial_md5: str
-
-    @staticmethod
-    def from_req_body(body: str) -> "LoginRequestModel":
-        """"""
+from models.request.login import LoginRequestModel
 
 async def login_handle(
     request: Request,
@@ -34,12 +15,15 @@ async def login_handle(
     """Handles the authentication process."""
 
     # Parse data.
-    hwid = StableHWID(
-        "b",
-        "b",
-        "b",
-        "b",
-        "b",
+    login_data = LoginRequestModel.from_req_body(
+        (await request.body()).decode(),
+    )
+    hwid = StableHWID( # TODO: from_login()
+        client_md5= login_data.osu_path_md5,
+        adapter= login_data.adapters,
+        adapter_md5= login_data.adapters_md5,
+        uninstaller_md5= login_data.uninstall_md5,
+        serial_md5= login_data.serial_md5,
     )
     user_id = 1000
 
@@ -57,10 +41,12 @@ async def login_handle(
 
     # Create client from data
     location = await geolocate_request(request)
+    location.set_time_zone(login_data.utc_timezone)
     client = await StableClient.from_login(
         user= user,
         hwid= hwid,
         location= location,
+        request= login_data,
     )
 
     # Auth
@@ -76,6 +62,8 @@ async def login_handle(
         + packet.login_reply(user.id)
         + packet.notification("Hello, world!")
         + packet.channel_info_end()
+        + packet.stats_client(client)
+        + packet.protocol_ver(19)
     )
 
     # Grant authentication token

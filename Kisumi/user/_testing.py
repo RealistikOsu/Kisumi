@@ -29,7 +29,14 @@ async def configure_test_user() -> None:
             REALISTIK_USER,
             mode,
             c_mode,
-            0, 0, 0.0, 0, 0, 0.0, 0, 0
+            654888,
+            453345,
+            3727.2,
+            0,
+            0,
+            100.0,
+            0,
+            1
         ) for c_mode in CustomMode for mode in Mode},
         REALISTIK_USER, 0, 0
     )

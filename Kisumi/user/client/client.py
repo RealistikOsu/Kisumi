@@ -15,6 +15,7 @@ from typing import (
     Optional,
 )
 from dataclasses import dataclass
+from models.request.login import LoginRequestModel
 
 if TYPE_CHECKING:
     from user.user import User
@@ -51,8 +52,7 @@ class StableClient(AbstractClient):
     auth: Optional[StableAuthComponent]
     queue: ByteBuffer
     hwid: StableHWID
-    c_mode: CustomMode = CustomMode.VANILLA
-    mode: Mode = Mode.STANDARD
+    timezone: int
 
     # Public methods
     async def on_attach(self, user: "User") -> None:
@@ -66,7 +66,8 @@ class StableClient(AbstractClient):
     
     # Staticmethods/Classmethods
     @staticmethod
-    async def from_login(user: "User", hwid: StableHWID, location: IPLocation) -> "StableClient":
+    async def from_login(user: "User", hwid: StableHWID, location: IPLocation,
+                         request: LoginRequestModel) -> "StableClient":
         """Creates a default instance of `StableClient` using data from login."""
 
         return StableClient(
@@ -81,6 +82,7 @@ class StableClient(AbstractClient):
             action= Action.new(),
             location= location,
             user= user,
+            timezone= request.utc_timezone,
         )
 
     async def logout(self) -> None:
@@ -88,4 +90,7 @@ class StableClient(AbstractClient):
     
     @property
     def current_stats(self) -> "ModeStats":
-        return self.user.stats.from_modes(self.c_mode, self.mode)
+        return self.user.stats.from_modes(
+            self.action.c_mode,
+            self.action.mode,
+        )
