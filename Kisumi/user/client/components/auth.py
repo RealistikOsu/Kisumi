@@ -43,15 +43,17 @@ class StableAuthComponent(AbstractAuthComponent):
         "_pw_bcrypt",
         "_cached_md5",
         "_user",
+        "_client_id",
     )
 
-    def __init__(self, pw: BCryptPassword, user: "User") -> None:
+    def __init__(self, pw: BCryptPassword, user: "User", client_id: str) -> None:
         super().__init__()
 
         self._lock = asyncio.Lock()
         self._pw_bcrypt = pw
         self._cached_md5 = None
         self._user = user
+        self._client_id = client_id
     
     def generate_jwt_dict(self) -> AuthJWT:
         """Generates a new JWT auth token dict for the user with the default
@@ -64,6 +66,7 @@ class StableAuthComponent(AbstractAuthComponent):
             "start": t,
             "expiry": t + config.CRYPT_JWT_EXPIRY,
             "type": AuthType.STABLE,
+            "client_id": self._client_id,
         }
     
     def generate_jwt(self) -> str:

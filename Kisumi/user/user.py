@@ -22,7 +22,7 @@ class User:
     name: str
     email: str
     stats: Stats
-    clients: list[AbstractClient] # Ordered by priority
+    clients: dict[str, AbstractClient] # TODO: Client List object with lock.
     scores: Any # Iterable object holding a list of top 100 scores and able to fetch more.
     password: BCryptPassword
     notifications: Any
@@ -48,14 +48,7 @@ class User:
         """Returns the primary stable client attached to the user if present,
         else returns `None`."""
 
-        # User has no clients attrached.
-        if not self.clients:
-            return
-        
-        # If the first one is a valid stable client, return it. In the clients
-        # list, the stable client shall always be prioritised.
-        if (first_client := self.clients[0]).type is ClientType.STABLE:
-            return first_client
+        return self.client if self.client.type is ClientType.STABLE else None
     
     @property
     def stable_clients(self) -> list[StableClient]:
@@ -66,13 +59,14 @@ class User:
     @property
     def stable_clients_generator(self) -> Generator[StableClient, None, None]:
         """Same as `User.stable_clients` except returns a generator."""
-        return (cl for cl in self.clients if cl.type is ClientType.STABLE)
+        return (cl for cl in self.clients.values() 
+                if cl.type is ClientType.STABLE)
     
     @property
     def client(self) -> Optional[AbstractClient]:
         """Returns the user's primary client if attached."""
 
-        return self.clients[0] if self.clients else None
+        return next(iter(self.clients)) if self.clients else None
 
     @property
     def online(self) -> bool:
@@ -87,8 +81,17 @@ class User:
         # Stable client assumes priority as long as no other ones are attached
         # (tourney).
         if client.type is ClientType.STABLE and not self.stable_client:
-            self.clients.insert(0, client)
+            # Dies ordered dicts that dont allow indexes.
+            self.__insert_client_to_front(client)
         else:
-            self.clients.append(client)
+            self.clients[client.id] = client
         
         await client.on_attach(self)
+    
+    def __insert_client_to_front(self, client: AbstractClient) -> None:
+        """Inserts a client to the front of the client registry. Temporary
+        function prior to the addition of a proper client manager."""
+
+        self.client = {
+                client.id: client
+        } | self.client

@@ -16,6 +16,7 @@ from typing import (
 )
 from dataclasses import dataclass
 from models.request.login import LoginRequestModel
+import uuid
 
 if TYPE_CHECKING:
     from user.user import User
@@ -26,6 +27,7 @@ class AbstractClient(ABC):
     """An abstract client class."""
 
     type: ClientType
+    id: str
     auth: AbstractAuthComponent
     chat: AbstractChatComponent
     user: Optional["User"]
@@ -83,6 +85,7 @@ class StableClient(AbstractClient):
             location= location,
             user= user,
             timezone= request.utc_timezone,
+            id= str(uuid.uuid4()),
         )
 
     async def logout(self) -> None:
