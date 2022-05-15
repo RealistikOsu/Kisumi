@@ -9,6 +9,7 @@ class AuthJWT(TypedDict):
     """Type annotations for the authentication JWT."""
 
     user_id: int
+    client_id: str
     start: int
     expiry: int
     type: AuthType

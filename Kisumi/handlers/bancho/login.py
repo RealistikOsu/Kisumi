@@ -30,7 +30,7 @@ async def login_handle(
     # Fetch user object.
     user = await repos.user_manager.get_user(user_id)
 
-    if user.stable_client:
+    if await user.clients.stable_client():
         return (
               packet.notification("You already seem to have been logged in...")
             + packet.login_reply(LoginReply.FAILED)
@@ -53,8 +53,7 @@ async def login_handle(
     if not await client.auth.authenticate(hash_md5("bruhh")):
         return packet.login_reply(LoginReply.FAILED), None
 
-    await user.insert_client(client)
-    await repos.online.add_user(user)
+    await user.clients.attach(client)
 
     # Send the user info about the server.
     await client.queue.append(
